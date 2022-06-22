@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 
 class CloseLoopBlockInBowlEnv(CloseLoopEnv):
   def __init__(self, config):
+    if 'num_objects' not in config:
+      config['num_objects'] = 2
     super().__init__(config)
     self.bin_size = 0.25
     if 'transparent_bin' not in config:
