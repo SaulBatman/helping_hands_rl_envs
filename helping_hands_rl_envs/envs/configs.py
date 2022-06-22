@@ -5,15 +5,15 @@ DEFAULT_CONFIG = {
   'pos_candidate' : None,
   'perfect_grasp' : False,
   'perfect_place' : False,
-  'workspace_check' : 'box',
+  'workspace_check' : 'point',
   'in_hand_size' : 24,
   'in_hand_mode' : 'sub',
   'num_random_objects' : 0,
-  'random_orientation' : False,
+  'random_orientation' : True,
   'check_random_obj_valid' : False,
   'action_sequence' : 'pxyr',
   'simulate_grasp' : True,
-  'workspace' : np.array([[0.30, 0.60], [-0.15, 0.15], [0, 1]]),
+  'workspace' : np.array([[0.25, 0.65], [-0.2, 0.2], [0, 1]]),
   'object_scale_range': (0.60, 0.70),
   'max_steps' : 10,
   'obs_size' : 128,
@@ -24,7 +24,7 @@ DEFAULT_CONFIG = {
   'num_objects' : 1,
   'object_type' : 'cube',
   'hard_reset_freq': 1000,
-  'view_type': 'camera_center_xyzr',
+  'view_type': 'camera_center_xyz',
   'min_object_distance': None,
   'min_boarder_padding': None,
   # The random offset range for each object when generating the goal structure. This will help to reduce the domain gap
@@ -45,4 +45,6 @@ DEFAULT_CONFIG = {
   # The offset when adjusting gripper commands after gripper closes at an object. A bigger value increases the chance
   # for a grasp, but reduces the stability while holding it. Recommended value 0.01 or 0.001
   'kuka_adjust_gripper_offset': 0.01,
+  # whether to include a tray in close loop env
+  'close_loop_tray': False
 }

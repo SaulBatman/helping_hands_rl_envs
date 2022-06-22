@@ -49,7 +49,9 @@ def fillDeconstruct(agent, replay_buffer):
                'ramp_house_building_1',
                'ramp_house_building_2',
                'ramp_house_building_3',
-               'ramp_house_building_4']:
+               'ramp_house_building_4',
+               'ramp_improvise_house_building_2',
+               'ramp_improvise_house_building_3']:
         deconstruct_env = env + '_deconstruct'
     else:
         raise NotImplementedError('deconstruct env not supported for env: {}'.format(env))
@@ -133,5 +135,25 @@ def fillDeconstruct(agent, replay_buffer):
         states = copy.copy(states_)
         obs = copy.copy(obs_)
     pbar.close()
+    envs.close()
+
+def fillDeconstructUsingRunner(agent, replay_buffer, envs):
+  transitions = envs.gatherDeconstructTransitions(planner_episode, num_objects)
+  for i, transition in enumerate(transitions):
+    (state, in_hand, obs), action, reward, done, (next_state, next_in_hand, next_obs) = transition
+    actions_star_idx, actions_star = agent.getActionFromPlan(torch.tensor(np.expand_dims(action, 0)))
+    replay_buffer.add(ExpertTransition(
+      torch.tensor(state).float(),
+      (torch.tensor(obs).float(), torch.tensor(in_hand).float()),
+      actions_star_idx[0],
+      torch.tensor(reward).float(),
+      torch.tensor(next_state).float(),
+      (torch.tensor(next_obs).float(), torch.tensor(next_in_hand).float()),
+      torch.tensor(float(done)),
+      torch.tensor(float(0)),
+      torch.tensor(1))
+    )
+  envs.close()
+
 if __name__ == '__main__':
     fillDeconstruct()

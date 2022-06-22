@@ -5,16 +5,25 @@ from helping_hands_rl_envs.pybullet.utils import constants
 from helping_hands_rl_envs.envs.close_loop_envs.close_loop_env import CloseLoopEnv
 from helping_hands_rl_envs.pybullet.utils import transformations
 from helping_hands_rl_envs.planners.close_loop_block_stacking_planner import CloseLoopBlockStackingPlanner
+from helping_hands_rl_envs.pybullet.utils.constants import NoValidPositionException
 
 class CloseLoopBlockStackingEnv(CloseLoopEnv):
   def __init__(self, config):
+    if 'num_objects' not in config:
+      config['num_objects'] = 2
     super().__init__(config)
     assert self.num_obj >= 2
 
   def reset(self):
-    self.resetPybulletWorkspace()
-    self.robot.moveTo([self.workspace[0].mean(), self.workspace[1].mean(), 0.2], transformations.quaternion_from_euler(0, 0, 0))
-    self._generateShapes(constants.CUBE, self.num_obj, random_orientation=self.random_orientation)
+    while True:
+      self.resetPybulletWorkspace()
+      self.robot.moveTo([self.workspace[0].mean(), self.workspace[1].mean(), 0.2], transformations.quaternion_from_euler(0, 0, 0))
+      try:
+        self._generateShapes(constants.CUBE, self.num_obj, random_orientation=self.random_orientation)
+      except NoValidPositionException as e:
+        continue
+      else:
+        break
     return self._getObservation()
 
   def _getValidOrientation(self, random_orientation):
