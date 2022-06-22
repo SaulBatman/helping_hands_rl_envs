@@ -1,19 +1,7 @@
 import os
-import copy
-import numpy as np
-import numpy.random as npr
-from collections import deque
-
 import pybullet as pb
-import pybullet_data
-
-import helping_hands_rl_envs
-import time
+from helping_hands_rl_envs.pybullet.utils import constants
 from helping_hands_rl_envs.pybullet.robots.robot_base import RobotBase
-
-from helping_hands_rl_envs.pybullet.utils import pybullet_util
-from helping_hands_rl_envs.pybullet.utils import object_generation
-from helping_hands_rl_envs.pybullet.utils import transformations
 
 class UR5_Simple(RobotBase):
   '''
@@ -59,6 +47,26 @@ class UR5_Simple(RobotBase):
     self.gripper_closed = False
     self.holding_obj = None
     [pb.resetJointState(self.id, idx, self.home_positions[idx]) for idx in range(self.num_joints)]
+
+  def getGripperOpenRatio(self):
+    p1, p2 = self._getGripperJointPosition()
+    mean = (p1 + p2)/2
+    ratio = (mean - self.gripper_joint_limit[1]) / (self.gripper_joint_limit[0] - self.gripper_joint_limit[1])
+    return ratio
+
+  def controlGripper(self, open_ratio, max_it=100):
+    p1, p2 = self._getGripperJointPosition()
+    target = open_ratio * (self.gripper_joint_limit[0] - self.gripper_joint_limit[1]) + self.gripper_joint_limit[1]
+    self._sendGripperCommand(target, target)
+    it = 0
+    while abs(target - p1) + abs(target - p2) > 0.001:
+      pb.stepSimulation()
+      it += 1
+      p1_, p2_ = self._getGripperJointPosition()
+      if it > max_it or (abs(p1 - p1_) < 0.0001 and abs(p2 - p2_) < 0.0001):
+        return
+      p1 = p1_
+      p2 = p2_
 
   def adjustGripperCommand(self):
     p1, p2 = self._getGripperJointPosition()

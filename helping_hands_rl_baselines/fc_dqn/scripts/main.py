@@ -46,7 +46,6 @@ def train_step(agent, replay_buffer, logger):
     batch = replay_buffer.sample(batch_size)
     loss, td_error = agent.update(batch)
     logger.logTrainingStep(loss)
-    logger.num_training_steps += 1
     if logger.num_training_steps % target_update_freq == 0:
         agent.updateTarget()
 
@@ -124,7 +123,7 @@ def train():
 
     hyper_parameters['model_shape'] = agent.getModelStr()
     # logger = Logger(log_dir, checkpoint_interval=save_freq, hyperparameters=hyper_parameters)
-    logger = BaselineLogger(log_dir, checkpoint_interval=save_freq, hyperparameters=hyper_parameters, eval_freq=eval_freq)
+    logger = BaselineLogger(log_dir, checkpoint_interval=save_freq, num_eval_eps=num_eval_episodes, hyperparameters=hyper_parameters, eval_freq=eval_freq)
     logger.saveParameters(hyper_parameters)
 
     if buffer_type == 'expert':
@@ -258,7 +257,6 @@ def train():
             pbar.set_description(description)
             timer_start = timer_final
             pbar.update(logger.num_training_steps - pbar.n)
-        logger.num_steps += num_processes
 
         if logger.num_training_steps > 0 and eval_freq > 0 and logger.num_training_steps % eval_freq == 0:
             if eval_thread is not None:

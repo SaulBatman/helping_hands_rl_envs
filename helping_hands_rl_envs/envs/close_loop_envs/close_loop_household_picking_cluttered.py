@@ -11,6 +11,10 @@ from helping_hands_rl_envs.pybullet.utils.constants import NoValidPositionExcept
 
 class CloseLoopHouseholdPickingClutteredEnv(CloseLoopEnv):
   def __init__(self, config):
+    if 'num_objects' not in config:
+      config['num_objects'] = 15
+    if 'close_loop_tray' not in config:
+      config['close_loop_tray'] = True
     super().__init__(config)
     self.object_init_z = 0.1
     if 'transparent_bin' not in config:
@@ -18,7 +22,7 @@ class CloseLoopHouseholdPickingClutteredEnv(CloseLoopEnv):
     else:
       self.trans_bin = config['transparent_bin']
     if 'collision_penalty' not in config:
-      self.coll_pen = True
+      self.coll_pen = False
     else:
       self.coll_pen = config['collision_penalty']
     if 'fix_set' not in config:
@@ -29,8 +33,6 @@ class CloseLoopHouseholdPickingClutteredEnv(CloseLoopEnv):
       self.collision_terminate = False
     else:
       self.collision_terminate = config['collision_terminate']
-    self.tray = Tray()
-    self.bin_size = 0.25
 
     self.max_grasp_attempt = int(self.num_obj * 1.5)
 
@@ -38,11 +40,6 @@ class CloseLoopHouseholdPickingClutteredEnv(CloseLoopEnv):
     self.grasp_done = 0
     self.grasp_attempted = 0
     self.current_grasp_steps = 1
-
-  def initialize(self):
-    super().initialize()
-    self.tray.initialize(pos=[self.workspace[0].mean(), self.workspace[1].mean(), 0],
-                         size=[self.bin_size, self.bin_size, 0.1], transparent=self.trans_bin)
 
   def resetEnv(self):
     self.resetPybulletWorkspace()
